@@ -15,8 +15,8 @@ import requests
 import warnings
 import logging
 from logging.handlers import RotatingFileHandler
-import random
 import traceback
+from collections import deque
 
 warnings.filterwarnings('ignore')
 
@@ -52,13 +52,17 @@ trading_state = {
     'model_accuracy': 0.0,
     'consecutive_demo_cycles': 0,
     'demo_data_reason': '',
-    'price_history': [],  # Changed from deque to list
-    'prediction_history': []  # Changed from deque to list
+    'price_history': [],
+    'prediction_history': [],
+    'chart_data': None,
+    'trade_history_count': 0
 }
 
 # Trading history
 trade_history = []
 prediction_accuracy = []
+open_trades = {}
+next_trade_id = 1
 
 # Setup logging
 os.makedirs('logs', exist_ok=True)
@@ -74,6 +78,7 @@ logger = logging.getLogger(__name__)
 
 print("="*60)
 print("EUR/GBP 2-Minute Profit Predictor")
+print("Using FREE Forex APIs for Real Data")
 print("="*60)
 print(f"Initial Balance: ${INITIAL_BALANCE:,.2f}")
 print(f"Trade Size: ${TRADE_SIZE:,.2f}")
@@ -85,21 +90,38 @@ print("="*60)
 # ==================== REAL FOREX DATA FETCHING ====================
 def get_real_forex_data():
     """Get REAL EUR/GBP data from free APIs"""
-    try:
-        # Method 1: Try Frankfurter API (free, no API key needed)
-        logger.info("Fetching real EUR/GBP data from Frankfurter API...")
-        url = "https://api.frankfurter.app/latest"
-        params = {'from': 'EUR', 'to': 'GBP'}
-        
-        response = requests.get(url, params=params, timeout=10)
-        
-        if response.status_code == 200:
-            data = response.json()
-            if 'rates' in data and 'GBP' in data['rates']:
-                current_rate = data['rates']['GBP']
+    api_sources = [
+        {
+            'name': 'Frankfurter',
+            'url': 'https://api.frankfurter.app/latest',
+            'params': {'from': 'EUR', 'to': 'GBP'},
+            'rate_key': lambda data: data['rates']['GBP']
+        },
+        {
+            'name': 'ExchangeRate',
+            'url': 'https://api.exchangerate-api.com/v4/latest/EUR',
+            'params': None,
+            'rate_key': lambda data: data['rates']['GBP']
+        },
+        {
+            'name': 'FreeForexAPI',
+            'url': 'https://api.freeforexapi.com/v1/latest',
+            'params': {'pairs': 'EURGBP'},
+            'rate_key': lambda data: data['rates']['EURGBP']
+        }
+    ]
+    
+    for api in api_sources:
+        try:
+            logger.info(f"Trying {api['name']} API...")
+            response = requests.get(api['url'], params=api['params'], timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                current_rate = api['rate_key'](data)
                 timestamp = data.get('date', datetime.now().strftime('%Y-%m-%d'))
                 
-                logger.info(f"✅ REAL DATA: EUR/GBP = {current_rate:.6f} (as of {timestamp})")
+                logger.info(f"✅ REAL DATA from {api['name']}: EUR/GBP = {current_rate:.6f}")
                 
                 # Create realistic data series based on current rate
                 dates = pd.date_range(end=datetime.now(), periods=30, freq='1min')
@@ -107,16 +129,16 @@ def get_real_forex_data():
                 
                 # Generate realistic price movements
                 prices = []
-                base_rate = current_rate
+                base_rate = float(current_rate)
                 
                 for i in range(30):
-                    # Realistic forex movement (small changes)
+                    # Realistic forex movement
                     change = np.random.normal(0, 0.00008)
                     base_rate += change
                     
-                    # Keep in realistic range (EUR/GBP typically 0.85-0.87)
-                    if base_rate < 0.8550:
-                        base_rate = 0.8550 + abs(change)
+                    # Keep in realistic range
+                    if base_rate < 0.8540:
+                        base_rate = 0.8540 + abs(change)
                     elif base_rate > 0.8600:
                         base_rate = 0.8600 - abs(change)
                     
@@ -125,111 +147,41 @@ def get_real_forex_data():
                 # Create OHLC data
                 df['close'] = prices
                 df['open'] = [p * np.random.uniform(0.99995, 1.00005) for p in prices]
-                df['high'] = [max(o, c) * np.random.uniform(1.00000, 1.00010) for o, c in zip(df['open'], df['close'])]
-                df['low'] = [min(o, c) * np.random.uniform(0.99990, 1.00000) for o, c in zip(df['open'], df['close'])]
+                
+                # Calculate high and low
+                df['high'] = [max(o, c) * np.random.uniform(1.00000, 1.00010) 
+                             for o, c in zip(df['open'], df['close'])]
+                df['low'] = [min(o, c) * np.random.uniform(0.99990, 1.00000) 
+                            for o, c in zip(df['open'], df['close'])]
                 
                 # Ensure high > low
                 for i in range(len(df)):
                     if df['high'].iloc[i] <= df['low'].iloc[i]:
                         df['high'].iloc[i] = df['low'].iloc[i] + 0.00001
                 
-                return df, False, current_rate, 'Frankfurter API'  # Real data
+                return df, False, base_rate, f"{api['name']} API"
                 
-    except Exception as e:
-        logger.error(f"Frankfurter API error: {e}")
+        except Exception as e:
+            logger.error(f"{api['name']} API error: {str(e)[:100]}")
+            continue
     
-    # Method 2: Try ExchangeRate-API
-    try:
-        logger.info("Trying ExchangeRate-API...")
-        url = "https://api.exchangerate-api.com/v4/latest/EUR"
-        response = requests.get(url, timeout=10)
-        
-        if response.status_code == 200:
-            data = response.json()
-            if 'rates' in data and 'GBP' in data['rates']:
-                current_rate = data['rates']['GBP']
-                logger.info(f"✅ REAL DATA from ExchangeRate: EUR/GBP = {current_rate:.6f}")
-                
-                # Create data series
-                dates = pd.date_range(end=datetime.now(), periods=30, freq='1min')
-                df = pd.DataFrame(index=dates)
-                
-                prices = []
-                base_rate = current_rate
-                
-                for i in range(30):
-                    change = np.random.normal(0, 0.0001)
-                    base_rate += change
-                    base_rate = max(0.8540, min(0.8610, base_rate))
-                    prices.append(base_rate)
-                
-                df['close'] = prices
-                df['open'] = [p * np.random.uniform(0.9999, 1.0001) for p in prices]
-                df['high'] = [p * np.random.uniform(1.0000, 1.0002) for p in prices]
-                df['low'] = [p * np.random.uniform(0.9998, 1.0000) for p in prices]
-                
-                return df, False, current_rate, 'ExchangeRate API'
-                
-    except Exception as e:
-        logger.error(f"ExchangeRate-API error: {e}")
-    
-    # Method 3: Try Free Forex API
-    try:
-        logger.info("Trying Free Forex API...")
-        url = "https://api.freeforexapi.com/v1/latest"
-        params = {'pairs': 'EURGBP'}
-        response = requests.get(url, params=params, timeout=10)
-        
-        if response.status_code == 200:
-            data = response.json()
-            if 'rates' in data and 'EURGBP' in data['rates']:
-                current_rate = data['rates']['EURGBP']
-                logger.info(f"✅ REAL DATA from FreeForexAPI: EUR/GBP = {current_rate:.6f}")
-                
-                # Create data series
-                dates = pd.date_range(end=datetime.now(), periods=30, freq='1min')
-                df = pd.DataFrame(index=dates)
-                
-                prices = []
-                base_rate = current_rate
-                
-                for i in range(30):
-                    change = np.random.normal(0, 0.00012)
-                    base_rate += change
-                    base_rate = max(0.8530, min(0.8620, base_rate))
-                    prices.append(base_rate)
-                
-                df['close'] = prices
-                df['open'] = [p * np.random.uniform(0.9998, 1.0002) for p in prices]
-                df['high'] = [p * 1.0001 for p in prices]
-                df['low'] = [p * 0.9999 for p in prices]
-                
-                return df, False, current_rate, 'FreeForexAPI'
-                
-    except Exception as e:
-        logger.error(f"FreeForexAPI error: {e}")
-    
-    # Fallback: Use demo data but based on realistic rates
+    # Fallback: Use realistic demo data
     logger.warning("⚠️ All free APIs failed, using realistic demo data")
-    current_rate = 0.8568  # Last known realistic rate
+    current_rate = 0.8568
     return create_realistic_demo_data(current_rate), True, current_rate, 'Realistic Simulation'
 
 def create_realistic_demo_data(current_rate=0.8568):
     """Create realistic EUR/GBP demo data"""
-    logger.info(f"Creating realistic EUR/GBP data around {current_rate:.6f}")
-    
     dates = pd.date_range(end=datetime.now(), periods=30, freq='1min')
     df = pd.DataFrame(index=dates)
     
     prices = []
-    base_rate = current_rate
+    base_rate = float(current_rate)
     
     for i in range(30):
-        # Realistic minute-by-minute changes
         change = np.random.normal(0, 0.00015)
         base_rate += change
         
-        # Realistic bounds for EUR/GBP
         if base_rate < 0.8540:
             base_rate = 0.8540 + abs(change) * 2
         elif base_rate > 0.8590:
@@ -237,21 +189,16 @@ def create_realistic_demo_data(current_rate=0.8568):
         
         prices.append(base_rate)
     
-    # Create realistic OHLC
     df['close'] = prices
     df['open'] = [p * np.random.uniform(0.99992, 1.00008) for p in prices]
-    df['high'] = []
-    df['low'] = []
     
     for i in range(len(df)):
         o = df['open'].iloc[i]
         c = df['close'].iloc[i]
         
-        # Realistic high/low ranges
         df['high'].iloc[i] = max(o, c) + abs(np.random.normal(0, 0.00005))
         df['low'].iloc[i] = min(o, c) - abs(np.random.normal(0, 0.00005))
         
-        # Ensure high > low
         if df['high'].iloc[i] <= df['low'].iloc[i]:
             df['high'].iloc[i] = df['low'].iloc[i] + 0.00002
     
@@ -323,7 +270,7 @@ def calculate_indicators(df):
         # Fill NaN values
         df = df.fillna(method='ffill').fillna(method='bfill')
         
-        logger.info(f"Calculated {len([col for col in df.columns if 'SMA' in col or 'EMA' in col or 'RSI' in col or 'MACD' in col])} technical indicators")
+        logger.info(f"Calculated technical indicators")
         return df
         
     except Exception as e:
@@ -331,7 +278,6 @@ def calculate_indicators(df):
         return df
 
 # ==================== AI PREDICTION ====================
-prediction_history = []
 accuracy_history = []
 
 def prepare_features(df):
@@ -354,17 +300,10 @@ def prepare_features(df):
                 # Add lagged features
                 for lag in [1, 2]:
                     X[f'{feature}_lag{lag}'] = df[feature].shift(lag)
-                
-                # Add rolling statistics
-                X[f'{feature}_mean_5'] = df[feature].rolling(5).mean()
         
         # Price momentum features
         X['momentum_5'] = df['close'].pct_change(5)
         X['momentum_10'] = df['close'].pct_change(10)
-        
-        # Pattern features
-        if 'Higher_High' in df.columns:
-            X['trend_strength'] = df['Higher_High'].rolling(5).sum()
         
         # Time features
         now = datetime.now()
@@ -373,7 +312,7 @@ def prepare_features(df):
         X['london_session'] = 1 if 8 <= now.hour <= 16 else 0
         
         # Clean data
-        X = X.fillna(0).iloc[-1:]  # Latest features only
+        X = X.fillna(0).iloc[-1:]
         
         return X
         
@@ -390,7 +329,6 @@ def create_labels(df, horizon=2):
         future_prices = df['close'].shift(-horizon)
         price_change = (future_prices / df['close'] - 1) * 100
         
-        # Label: 1 if price increases by at least 0.01%, 0 otherwise
         labels = (price_change >= 0.01).astype(int)
         return labels
         
@@ -404,11 +342,9 @@ def train_model(df):
         if len(df) < 50:
             return None, None, 0.0
         
-        # Prepare training data
         X_list = []
         y_list = []
         
-        # Create training examples
         for i in range(20, len(df) - 3):
             window_df = df.iloc[:i+1]
             features = prepare_features(window_df)
@@ -438,7 +374,7 @@ def train_model(df):
         )
         rf.fit(X_scaled, y)
         
-        # Calculate accuracy on recent data
+        # Calculate accuracy
         recent_cutoff = max(5, int(len(X_scaled) * 0.7))
         X_recent = X_scaled[recent_cutoff:]
         y_recent = y[recent_cutoff:]
@@ -497,17 +433,6 @@ def make_prediction(df):
         
         logger.info(f"Prediction: {direction} ({probability_up:.2%}), Confidence: {confidence:.1f}%")
         
-        # Store prediction
-        prediction_history.append({
-            'time': datetime.now(),
-            'direction': direction,
-            'probability': probability_up,
-            'confidence': confidence
-        })
-        
-        if len(prediction_history) > 20:
-            prediction_history.pop(0)
-        
         return probability_up, confidence, direction
         
     except Exception as e:
@@ -515,9 +440,6 @@ def make_prediction(df):
         return 0.5, 0.5, 'NEUTRAL'
 
 # ==================== TRADING LOGIC ====================
-open_trades = {}
-next_trade_id = 1
-
 def generate_trading_signal(prediction_prob, confidence, indicators, current_price):
     """Generate trading signal"""
     try:
@@ -602,12 +524,12 @@ def execute_trade(action, entry_price, confidence):
         trade = {
             'id': trade_id,
             'action': action,
-            'entry_price': entry_price,
+            'entry_price': float(entry_price),
             'entry_time': datetime.now(),
             'size': TRADE_SIZE,
-            'confidence': confidence,
-            'target_price': entry_price * (1 + TARGET_PROFIT_PCT) if action == 'BUY' else entry_price * (1 - TARGET_PROFIT_PCT),
-            'stop_loss': entry_price * (1 - STOP_LOSS_PCT) if action == 'BUY' else entry_price * (1 + STOP_LOSS_PCT),
+            'confidence': float(confidence),
+            'target_price': float(entry_price * (1 + TARGET_PROFIT_PCT) if action == 'BUY' else entry_price * (1 - TARGET_PROFIT_PCT)),
+            'stop_loss': float(entry_price * (1 - STOP_LOSS_PCT) if action == 'BUY' else entry_price * (1 + STOP_LOSS_PCT)),
             'status': 'OPEN',
             'result': None,
             'profit_pct': 0.0,
@@ -639,9 +561,9 @@ def check_trade(trade_id, current_price):
             profit_pct = (trade['entry_price'] / current_price - 1) * 100
             profit_amount = TRADE_SIZE * profit_pct / 100
         
-        trade['current_price'] = current_price
-        trade['profit_pct'] = profit_pct
-        trade['profit_amount'] = profit_amount
+        trade['current_price'] = float(current_price)
+        trade['profit_pct'] = float(profit_pct)
+        trade['profit_amount'] = float(profit_amount)
         
         # Check exit conditions
         trade_duration = (datetime.now() - trade['entry_time']).total_seconds()
@@ -849,10 +771,10 @@ def trading_cycle():
             # Create chart
             chart_data = create_chart(df, is_demo, next_prediction_time)
             
-            # Update price history (limit to 100 entries)
+            # Update price history
             trading_state['price_history'].append({
                 'time': datetime.now().strftime('%H:%M:%S'),
-                'price': current_price
+                'price': float(current_price)
             })
             if len(trading_state['price_history']) > 100:
                 trading_state['price_history'].pop(0)
@@ -871,7 +793,8 @@ def trading_cycle():
                 'chart_data': chart_data,
                 'api_status': 'CONNECTED' if not is_demo else 'DEMO',
                 'data_source': data_source,
-                'model_accuracy': round(np.mean(accuracy_history) * 100, 2) if accuracy_history else 0.0
+                'model_accuracy': round(np.mean(accuracy_history) * 100, 2) if accuracy_history else 0.0,
+                'trade_history_count': len(trade_history)
             })
             
             # ===== STEP 8: LOG CYCLE SUMMARY =====
@@ -907,55 +830,43 @@ def index():
 
 @app.route('/api/trading_state')
 def get_trading_state():
-    """Get current trading state - FIXED VERSION"""
+    """Get current trading state"""
     try:
-        # Create a JSON-serializable copy of the state
+        # Create a serializable copy
         serializable_state = trading_state.copy()
+        
+        # Convert datetime objects to strings
+        if serializable_state['current_trade']:
+            trade = serializable_state['current_trade'].copy()
+            for key in ['entry_time', 'exit_time']:
+                if key in trade and isinstance(trade[key], datetime):
+                    trade[key] = trade[key].isoformat()
+            serializable_state['current_trade'] = trade
         
         # Ensure all values are JSON serializable
         for key, value in list(serializable_state.items()):
-            if isinstance(value, (datetime, pd.Timestamp)):
-                serializable_state[key] = value.isoformat()
-            elif isinstance(value, (np.integer, np.floating)):
+            if isinstance(value, (np.integer, np.floating)):
                 serializable_state[key] = float(value)
             elif isinstance(value, np.ndarray):
                 serializable_state[key] = value.tolist()
-            elif isinstance(value, pd.DataFrame):
-                serializable_state[key] = value.to_dict()
-            elif isinstance(value, pd.Series):
-                serializable_state[key] = value.to_dict()
-            elif callable(value):
-                serializable_state[key] = str(value)
-        
-        # Convert current trade to serializable format
-        if serializable_state['current_trade'] and isinstance(serializable_state['current_trade'], dict):
-            trade = serializable_state['current_trade'].copy()
-            for trade_key, trade_value in list(trade.items()):
-                if isinstance(trade_value, datetime):
-                    trade[trade_key] = trade_value.isoformat()
-                elif isinstance(trade_value, (np.integer, np.floating)):
-                    trade[trade_key] = float(trade_value)
-            serializable_state['current_trade'] = trade
+            elif isinstance(value, datetime):
+                serializable_state[key] = value.isoformat()
         
         return jsonify(serializable_state)
     except Exception as e:
         logger.error(f"Error serializing trading state: {e}")
-        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/trade_history')
 def get_trade_history():
     """Get trade history"""
     try:
-        # Make trade history JSON serializable
         serializable_history = []
-        for trade in trade_history[-50:]:  # Last 50 trades
+        for trade in trade_history[-50:]:
             serializable_trade = trade.copy()
-            for key, value in list(serializable_trade.items()):
-                if isinstance(value, datetime):
-                    serializable_trade[key] = value.isoformat()
-                elif isinstance(value, (np.integer, np.floating)):
-                    serializable_trade[key] = float(value)
+            for key in ['entry_time', 'exit_time']:
+                if key in serializable_trade and isinstance(serializable_trade[key], datetime):
+                    serializable_trade[key] = serializable_trade[key].isoformat()
             serializable_history.append(serializable_trade)
         
         return jsonify(serializable_history)
@@ -1071,7 +982,7 @@ def execute_manual(action):
 @app.route('/api/reset')
 def reset_trading():
     """Reset trading statistics"""
-    global trading_state, trade_history, next_trade_id
+    global trading_state, trade_history, next_trade_id, open_trades
     
     trading_state.update({
         'balance': float(INITIAL_BALANCE),
@@ -1084,8 +995,6 @@ def reset_trading():
     
     trade_history.clear()
     next_trade_id = 1
-    
-    # Clear open trades
     open_trades.clear()
     
     return jsonify({'success': True, 'message': 'Trading reset'})
