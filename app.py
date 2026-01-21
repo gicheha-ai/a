@@ -14,14 +14,11 @@ import plotly.utils
 import requests
 import warnings
 import logging
-from logging.handlers import RotatingFileHandler
 import traceback
-from flask_cors import CORS  # Add this import
 
 warnings.filterwarnings('ignore')
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
 
 # ==================== CONFIGURATION ====================
 TRADING_SYMBOL = "EURGBP"
@@ -70,12 +67,10 @@ next_trade_id = 1
 system_ready = False
 
 # Setup logging
-os.makedirs('logs', exist_ok=True)
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        RotatingFileHandler('logs/trading.log', maxBytes=10000000, backupCount=5),
         logging.StreamHandler()
     ]
 )
@@ -102,27 +97,19 @@ def get_forex_data():
     try:
         # Try multiple APIs
         apis = [
-            ('https://api.frankfurter.app/latest?from=EUR&to=GBP', 'GBP'),
-            ('https://api.exchangerate-api.com/v4/latest/EUR', 'GBP'),
-            ('https://api.freeforexapi.com/v1/latest?pairs=EURGBP', 'EURGBP')
+            ('Frankfurter', 'https://api.frankfurter.app/latest?from=EUR&to=GBP', 'GBP'),
+            ('ExchangeRate', 'https://api.exchangerate-api.com/v4/latest/EUR', 'GBP'),
         ]
         
-        for api_url, rate_key in apis:
+        for api_name, api_url, rate_key in apis:
             try:
-                logger.info(f"Trying API: {api_url}")
+                logger.info(f"Trying {api_name} API...")
                 response = requests.get(api_url, timeout=5)
                 if response.status_code == 200:
                     data = response.json()
-                    
-                    if 'frankfurter' in api_url:
-                        rate = data['rates']['GBP']
-                    elif 'exchangerate' in api_url:
-                        rate = data['rates']['GBP']
-                    else:
-                        rate = data['rates']['EURGBP']
-                    
+                    rate = data['rates'][rate_key]
                     current_rate = float(rate)
-                    logger.info(f"✅ Got rate: {current_rate:.6f}")
+                    logger.info(f"✅ Got rate from {api_name}: {current_rate:.6f}")
                     
                     # Generate sample data around current rate
                     dates = pd.date_range(end=datetime.now(), periods=20, freq='1min')
@@ -142,10 +129,10 @@ def get_forex_data():
                     df['high'] = [p * 1.00002 for p in prices]
                     df['low'] = [p * 0.99998 for p in prices]
                     
-                    return df, False, current_rate, 'Live API'
+                    return df, False, current_rate, f'{api_name} API'
                     
             except Exception as e:
-                logger.warning(f"API failed: {str(e)[:100]}")
+                logger.warning(f"{api_name} API failed: {str(e)[:100]}")
                 continue
         
         # Fallback to simulation
@@ -297,7 +284,7 @@ def trading_cycle():
                 'prediction': direction,
                 'action': action,
                 'confidence': round(float(confidence), 1),
-                'next_prediction_time': 60,  # Update every minute for testing
+                'next_prediction_time': 60,
                 'indicators': indicators,
                 'is_demo_data': is_demo,
                 'last_update': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -313,7 +300,7 @@ def trading_cycle():
             logger.info(f"Price: {current_price:.5f}, Prediction: {direction}, Action: {action}")
             
             # Wait for next cycle
-            time.sleep(60)  # Update every minute
+            time.sleep(60)
             
         except Exception as e:
             logger.error(f"Cycle error: {e}")
@@ -337,7 +324,7 @@ def manage_trades(current_price):
         trade['profit_amount'] = float(profit_amount)
         
         # Check exit conditions
-        if abs(profit_pct) >= 0.05 or profit_pct <= -0.03:  # 0.05% profit or 0.03% loss
+        if abs(profit_pct) >= 0.05 or profit_pct <= -0.03:
             # Close trade
             trade['status'] = 'CLOSED'
             trade['exit_time'] = datetime.now()
@@ -465,6 +452,7 @@ def execute_manual(action):
         return jsonify({'success': False, 'error': 'Trade already in progress'})
     
     # Create trade
+    global next_trade_id
     trade_id = next_trade_id
     next_trade_id += 1
     
@@ -523,7 +511,6 @@ def start_trading_bot():
         
         logger.info("✅ Trading system started")
         print("✅ System ready!")
-        print(f"✅ API endpoints available at http://localhost:{port}")
         
     except Exception as e:
         logger.error(f"❌ Error starting system: {e}")
@@ -534,15 +521,16 @@ if __name__ == '__main__':
     # Start trading bot
     start_trading_bot()
     
-    # Run Flask app
+    # Get port from environment (Render sets this)
     port = int(os.environ.get('PORT', 5000))
+    
     print(f"🌐 Web server starting on port {port}")
     print(f"📊 Open your browser to: http://localhost:{port}")
     print("="*60)
     print("System Status: RUNNING")
     print("="*60)
     
-    # Run the app
+    # Run the app - IMPORTANT: Use 0.0.0.0 for Render
     app.run(
         host='0.0.0.0',
         port=port,
