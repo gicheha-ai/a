@@ -1,9 +1,8 @@
 Flask
 pandas
 numpy
-scikit-learn
 pandas-ta
 plotly
 requests
 gunicorn
-python-dotenv
+scikit-learn
