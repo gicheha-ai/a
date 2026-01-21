@@ -23,7 +23,7 @@ warnings.filterwarnings('ignore')
 app = Flask(__name__)
 
 # Configuration
-API_KEYS = ['QE0TAOPZZN1VT8LH', 'QSCWPKVUYLOD506J']
+API_KEYS = ['TZHOOJ7CNDMQ7HYD' , 'QSCWPKVUYLOD506J']
 current_key_index = 0
 BASE_URL = "https://www.alphavantage.co/query"
 
