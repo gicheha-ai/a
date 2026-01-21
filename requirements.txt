@@ -5,4 +5,3 @@ pandas-ta
 plotly
 requests
 gunicorn
-scikit-learn
