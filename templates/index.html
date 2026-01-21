@@ -14,91 +14,98 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            background: #0a1929;
             color: #fff;
             min-height: 100vh;
             padding: 20px;
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
         }
         
         .header {
             text-align: center;
             margin-bottom: 30px;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            background: linear-gradient(135deg, #0c2b46, #1a3a5f);
             border-radius: 15px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid #2a4a7a;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
         
         .header h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
-            background: linear-gradient(90deg, #00ff88, #00ccff);
+            background: linear-gradient(90deg, #00d4ff, #00ff9d);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(0, 212, 255, 0.3);
         }
         
         .header p {
-            color: #aaa;
+            color: #88c7ff;
             font-size: 1.1rem;
+            opacity: 0.9;
         }
         
         .status-banner {
-            background: rgba(255, 193, 7, 0.2);
-            border: 1px solid rgba(255, 193, 7, 0.3);
+            background: linear-gradient(135deg, #ff9800, #ff5722);
             border-radius: 10px;
             padding: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             text-align: center;
             font-size: 1.2rem;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
         .status-banner.success {
-            background: rgba(0, 255, 136, 0.2);
-            border-color: rgba(0, 255, 136, 0.3);
+            background: linear-gradient(135deg, #00c853, #00e676);
+            box-shadow: 0 5px 15px rgba(0, 200, 83, 0.3);
         }
         
         .status-banner.error {
-            background: rgba(255, 68, 68, 0.2);
-            border-color: rgba(255, 68, 68, 0.3);
+            background: linear-gradient(135deg, #ff1744, #f50057);
+            box-shadow: 0 5px 15px rgba(255, 23, 68, 0.3);
         }
         
         .dashboard {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            gap: 25px;
             margin-bottom: 30px;
         }
         
         .card {
-            background: rgba(0, 0, 0, 0.3);
+            background: #1a3a5f;
             border-radius: 15px;
-            padding: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s ease;
+            padding: 25px;
+            border: 1px solid #2a4a7a;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         }
         
         .card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            border-color: #00d4ff;
         }
         
         .card h3 {
-            color: #00ccff;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
+            color: #00d4ff;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
             display: flex;
             align-items: center;
             gap: 10px;
-        }
-        
-        .card h3 i {
-            font-size: 1.5rem;
+            border-bottom: 2px solid #2a4a7a;
+            padding-bottom: 10px;
         }
         
         .stat-grid {
@@ -108,60 +115,78 @@
         }
         
         .stat-item {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.2);
             padding: 15px;
             border-radius: 10px;
+            border: 1px solid #2a4a7a;
         }
         
         .stat-label {
-            color: #aaa;
+            color: #88c7ff;
             font-size: 0.9rem;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            font-weight: 500;
         }
         
         .stat-value {
             font-size: 1.8rem;
             font-weight: bold;
-            color: #00ff88;
+            color: #00ff9d;
+            text-shadow: 0 2px 5px rgba(0, 255, 157, 0.3);
         }
         
-        .prediction {
+        .prediction-container {
             text-align: center;
             padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            margin-top: 15px;
         }
         
         .prediction-signal {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             font-weight: bold;
-            margin: 10px 0;
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid;
         }
         
         .prediction-signal.bullish {
-            color: #00ff88;
+            color: #00ff9d;
+            border-color: #00ff9d;
+            text-shadow: 0 0 20px rgba(0, 255, 157, 0.5);
         }
         
         .prediction-signal.bearish {
-            color: #ff4444;
+            color: #ff4081;
+            border-color: #ff4081;
+            text-shadow: 0 0 20px rgba(255, 64, 129, 0.5);
         }
         
         .prediction-signal.neutral {
-            color: #ffcc00;
+            color: #ff9800;
+            border-color: #ff9800;
+            text-shadow: 0 0 20px rgba(255, 152, 0, 0.5);
         }
         
         .confidence-meter {
             width: 100%;
-            height: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            margin: 15px 0;
+            height: 25px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            margin: 20px 0;
             overflow: hidden;
+            border: 1px solid #2a4a7a;
         }
         
         .confidence-fill {
             height: 100%;
-            background: linear-gradient(90deg, #ff4444, #ffcc00, #00ff88);
-            border-radius: 10px;
-            transition: width 0.5s ease;
+            background: linear-gradient(90deg, #ff1744, #ff9800, #00e676);
+            border-radius: 12px;
+            transition: width 1s ease;
+            box-shadow: 0 0 10px rgba(0, 230, 118, 0.5);
         }
         
         .chart-container {
@@ -169,87 +194,100 @@
             height: 500px;
         }
         
+        #priceChart {
+            height: 100%;
+            width: 100%;
+        }
+        
         .controls {
             display: flex;
             gap: 15px;
             justify-content: center;
-            margin-top: 20px;
+            margin-top: 25px;
         }
         
         .btn {
-            padding: 12px 25px;
+            padding: 15px 30px;
             border: none;
-            border-radius: 8px;
-            font-size: 1rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
         
         .btn-buy {
-            background: linear-gradient(135deg, #00ff88, #00cc88);
+            background: linear-gradient(135deg, #00c853, #00e676);
             color: #000;
         }
         
         .btn-sell {
-            background: linear-gradient(135deg, #ff4444, #cc0000);
+            background: linear-gradient(135deg, #ff1744, #f50057);
             color: #fff;
         }
         
         .btn-reset {
-            background: linear-gradient(135deg, #ffcc00, #ff9900);
+            background: linear-gradient(135deg, #ff9800, #ff5722);
             color: #000;
         }
         
         .btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
         }
         
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-            transform: none;
+            transform: none !important;
         }
         
         .indicators {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 10px;
-            margin-top: 15px;
+            margin-top: 20px;
         }
         
         .indicator {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px;
             border-radius: 8px;
             text-align: center;
+            border: 1px solid #2a4a7a;
         }
         
         .indicator-label {
             font-size: 0.8rem;
-            color: #aaa;
+            color: #88c7ff;
+            margin-bottom: 5px;
         }
         
         .indicator-value {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: bold;
-            color: #00ccff;
+            color: #00d4ff;
         }
         
         .loading {
             text-align: center;
             padding: 50px;
+            grid-column: 1 / -1;
         }
         
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255, 255, 255, 0.1);
-            border-top: 5px solid #00ff88;
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #00d4ff;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
@@ -260,13 +298,62 @@
             100% { transform: rotate(360deg); }
         }
         
+        .trade-info {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border: 1px solid #2a4a7a;
+        }
+        
+        .trade-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2a4a7a;
+        }
+        
+        .trade-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .trade-stat {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .trade-label {
+            color: #88c7ff;
+            font-size: 0.8rem;
+        }
+        
+        .trade-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #00ff9d;
+        }
+        
+        .trade-value.negative {
+            color: #ff4081;
+        }
+        
         .footer {
             text-align: center;
             margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: #aaa;
+            padding-top: 25px;
+            border-top: 1px solid #2a4a7a;
+            color: #88c7ff;
             font-size: 0.9rem;
+        }
+        
+        .last-update {
+            font-size: 0.8rem;
+            color: #5d8cc9;
+            margin-top: 5px;
         }
         
         @media (max-width: 768px) {
@@ -278,6 +365,10 @@
                 grid-template-columns: 1fr;
             }
             
+            .stat-grid {
+                grid-template-columns: 1fr;
+            }
+            
             .chart-container {
                 height: 400px;
             }
@@ -285,25 +376,30 @@
             .controls {
                 flex-direction: column;
             }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>EUR/GBP 2-Minute Trading System</h1>
-            <p>Automated AI-powered forex trading with real-time predictions</p>
+            <h1>EUR/GBP Trading System</h1>
+            <p>AI-Powered Forex Trading with Real-time Analysis</p>
         </div>
         
         <div id="statusBanner" class="status-banner">
             <div class="spinner"></div>
-            <p>Connecting to trading system...</p>
+            <span>Connecting to trading system...</span>
         </div>
         
         <div id="dashboard" class="dashboard" style="display: none;">
-            <!-- Price and Prediction Card -->
+            <!-- Market Data Card -->
             <div class="card">
-                <h3>📈 Current Market</h3>
+                <h3>📈 Market Overview</h3>
                 <div class="stat-grid">
                     <div class="stat-item">
                         <div class="stat-label">Current Price</div>
@@ -319,20 +415,24 @@
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">Next Update</div>
-                        <div class="stat-value" id="nextUpdate">120s</div>
+                        <div class="stat-value" id="nextUpdate">60s</div>
                     </div>
                 </div>
-                <div class="prediction">
+                
+                <div class="prediction-container">
                     <div class="prediction-signal" id="predictionSignal">NEUTRAL</div>
                     <div class="confidence-meter">
                         <div class="confidence-fill" id="confidenceFill" style="width: 50%;"></div>
+                    </div>
+                    <div style="color: #88c7ff; font-size: 0.9rem;">
+                        AI Prediction Confidence
                     </div>
                 </div>
             </div>
             
             <!-- Trading Stats Card -->
             <div class="card">
-                <h3>💰 Trading Stats</h3>
+                <h3>💰 Trading Performance</h3>
                 <div class="stat-grid">
                     <div class="stat-item">
                         <div class="stat-label">Balance</div>
@@ -351,9 +451,11 @@
                         <div class="stat-value" id="totalProfit">$0.00</div>
                     </div>
                 </div>
+                
+                <h3 style="margin-top: 25px;">📊 Technical Indicators</h3>
                 <div class="indicators">
                     <div class="indicator">
-                        <div class="indicator-label">RSI</div>
+                        <div class="indicator-label">RSI (14)</div>
                         <div class="indicator-value" id="rsi">50.0</div>
                     </div>
                     <div class="indicator">
@@ -361,30 +463,33 @@
                         <div class="indicator-value" id="macd">0.0000</div>
                     </div>
                     <div class="indicator">
-                        <div class="indicator-label">Stochastic</div>
-                        <div class="indicator-value" id="stochastic">50.0</div>
+                        <div class="indicator-label">Model Accuracy</div>
+                        <div class="indicator-value" id="modelAccuracy">65%</div>
                     </div>
                     <div class="indicator">
-                        <div class="indicator-label">Model Acc</div>
-                        <div class="indicator-value" id="modelAccuracy">0%</div>
+                        <div class="indicator-label">Data Source</div>
+                        <div class="indicator-value" id="dataSource" style="font-size: 1rem;">Live</div>
                     </div>
                 </div>
             </div>
             
             <!-- Active Trade Card -->
             <div class="card">
-                <h3>🎯 Active Trade</h3>
+                <h3>🎯 Active Trading</h3>
                 <div id="activeTrade">
-                    <div style="text-align: center; padding: 40px; color: #aaa;">
-                        No active trade
+                    <div style="text-align: center; padding: 40px; color: #88c7ff;">
+                        <div style="font-size: 3rem; margin-bottom: 15px;">📊</div>
+                        <div style="font-size: 1.2rem; margin-bottom: 10px;">No Active Trade</div>
+                        <div style="font-size: 0.9rem; opacity: 0.7;">Waiting for trading signal...</div>
                     </div>
                 </div>
+                
                 <div class="controls">
                     <button class="btn btn-buy" onclick="executeTrade('BUY')" id="buyBtn">
-                        BUY EUR/GBP
+                        🔼 BUY EUR/GBP
                     </button>
                     <button class="btn btn-sell" onclick="executeTrade('SELL')" id="sellBtn">
-                        SELL EUR/GBP
+                        🔽 SELL EUR/GBP
                     </button>
                 </div>
             </div>
@@ -394,49 +499,64 @@
                 <h3>⚙️ System Status</h3>
                 <div class="stat-grid">
                     <div class="stat-item">
-                        <div class="stat-label">Data Source</div>
-                        <div class="stat-value" id="dataSource">Loading...</div>
+                        <div class="stat-label">System Status</div>
+                        <div class="stat-value" id="systemStatus">BOOTING</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">API Status</div>
                         <div class="stat-value" id="apiStatus">CONNECTING</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-label">System Status</div>
-                        <div class="stat-value" id="systemStatus">BOOTING</div>
+                        <div class="stat-label">Cycle Count</div>
+                        <div class="stat-value" id="cycleCount">0</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-label">Last Update</div>
-                        <div class="stat-value" id="lastUpdate">-</div>
+                        <div class="stat-label">Server Time</div>
+                        <div class="stat-value" id="serverTime" style="font-size: 1.2rem;">-</div>
                     </div>
                 </div>
-                <div class="controls" style="margin-top: 20px;">
-                    <button class="btn btn-reset" onclick="resetTrading()">
-                        🔄 Reset Trading
-                    </button>
+                
+                <div class="trade-info" style="margin-top: 20px;">
+                    <div class="trade-header">
+                        <div style="color: #00d4ff; font-weight: bold;">System Controls</div>
+                    </div>
+                    <div class="controls">
+                        <button class="btn btn-reset" onclick="resetTrading()" id="resetBtn">
+                            🔄 Reset Trading
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="last-update" id="lastUpdate" style="margin-top: 15px; text-align: center;">
+                    Last update: -
                 </div>
             </div>
             
             <!-- Chart Container -->
             <div class="card chart-container">
-                <h3>📊 Live Price Chart</h3>
+                <h3>📈 Live Price Chart</h3>
                 <div id="priceChart"></div>
             </div>
         </div>
         
         <div class="footer">
-            <p>EUR/GBP Trading System v1.0 | AI-Powered Forex Trading | Data updates every 2 minutes</p>
-            <p style="margin-top: 10px; font-size: 0.8rem; color: #666;">
-                This is a simulation for educational purposes. Forex trading involves risk.
-            </p>
+            <p>EUR/GBP Trading System v2.0 | AI-Powered Forex Analysis | Updates every 60 seconds</p>
+            <p class="last-update">For educational purposes only. Forex trading involves significant risk.</p>
         </div>
     </div>
     
     <script>
+        // Global variables
         let updateInterval;
         let currentState = {};
+        let connectionAttempts = 0;
+        const maxAttempts = 5;
         
-        // Format currency
+        // Format numbers
+        function formatPrice(price) {
+            return parseFloat(price).toFixed(5);
+        }
+        
         function formatCurrency(amount) {
             return '$' + parseFloat(amount).toLocaleString('en-US', {
                 minimumFractionDigits: 2,
@@ -444,178 +564,206 @@
             });
         }
         
-        // Format number
-        function formatNumber(num, decimals = 4) {
-            return parseFloat(num).toFixed(decimals);
+        function formatPercent(value) {
+            return parseFloat(value).toFixed(1) + '%';
         }
         
-        // Update UI with trading state
-        function updateUI(state) {
-            // Update basic info
-            document.getElementById('currentPrice').textContent = formatNumber(state.current_price, 5);
-            document.getElementById('predictionDirection').textContent = state.prediction;
-            document.getElementById('confidence').textContent = formatNumber(state.confidence, 1) + '%';
-            document.getElementById('nextUpdate').textContent = state.next_prediction_time + 's';
+        // Update status banner
+        function updateStatusBanner(status, message) {
+            const banner = document.getElementById('statusBanner');
             
-            // Update prediction signal
-            const predictionSignal = document.getElementById('predictionSignal');
-            predictionSignal.textContent = state.prediction;
-            predictionSignal.className = 'prediction-signal ' + state.prediction.toLowerCase();
-            
-            // Update confidence meter
-            document.getElementById('confidenceFill').style.width = state.confidence + '%';
-            
-            // Update trading stats
-            document.getElementById('balance').textContent = formatCurrency(state.balance);
-            document.getElementById('totalTrades').textContent = state.total_trades;
-            document.getElementById('winRate').textContent = formatNumber(state.win_rate, 1) + '%';
-            document.getElementById('totalProfit').textContent = formatCurrency(state.total_profit);
-            
-            // Update indicators
-            if (state.indicators) {
-                document.getElementById('rsi').textContent = formatNumber(state.indicators.RSI_14 || 50, 1);
-                document.getElementById('macd').textContent = formatNumber(state.indicators.MACD || 0, 5);
-                document.getElementById('stochastic').textContent = formatNumber(state.indicators.Stoch_K || 50, 1);
+            if (status === 'success') {
+                banner.className = 'status-banner success';
+                banner.innerHTML = `<span>✅ ${message}</span>`;
+                document.getElementById('dashboard').style.display = 'grid';
+            } else if (status === 'error') {
+                banner.className = 'status-banner error';
+                banner.innerHTML = `<span>⚠️ ${message}</span>`;
+                document.getElementById('dashboard').style.display = 'grid';
+            } else {
+                banner.className = 'status-banner';
+                banner.innerHTML = `<div class="spinner"></div><span>${message}</span>`;
             }
-            
-            document.getElementById('modelAccuracy').textContent = formatNumber(state.model_accuracy || 0, 1) + '%';
-            
-            // Update system status
-            document.getElementById('dataSource').textContent = state.data_source || 'Unknown';
-            document.getElementById('apiStatus').textContent = state.api_status || 'UNKNOWN';
-            document.getElementById('systemStatus').textContent = state.system_status || 'UNKNOWN';
-            document.getElementById('lastUpdate').textContent = state.last_update || '-';
-            
-            // Update active trade
-            updateActiveTrade(state.current_trade);
-            
-            // Update status banner
-            updateStatusBanner(state);
-            
-            // Update chart if available
-            if (state.chart_data) {
-                try {
-                    const chartData = JSON.parse(state.chart_data);
-                    Plotly.newPlot('priceChart', chartData.data, chartData.layout, {responsive: true});
-                } catch (e) {
-                    console.error('Error parsing chart data:', e);
+        }
+        
+        // Update UI with trading data
+        function updateUI(data) {
+            try {
+                // Update basic information
+                document.getElementById('currentPrice').textContent = formatPrice(data.current_price || 0);
+                document.getElementById('predictionDirection').textContent = data.prediction || 'NEUTRAL';
+                document.getElementById('confidence').textContent = formatPercent(data.confidence || 0);
+                document.getElementById('nextUpdate').textContent = (data.next_prediction_time || 60) + 's';
+                
+                // Update prediction signal
+                const predictionElement = document.getElementById('predictionSignal');
+                const prediction = data.prediction || 'NEUTRAL';
+                predictionElement.textContent = prediction;
+                predictionElement.className = 'prediction-signal ' + prediction.toLowerCase();
+                
+                // Update confidence meter
+                const confidence = Math.min(100, Math.max(0, data.confidence || 0));
+                document.getElementById('confidenceFill').style.width = confidence + '%';
+                
+                // Update trading stats
+                document.getElementById('balance').textContent = formatCurrency(data.balance || 0);
+                document.getElementById('totalTrades').textContent = data.total_trades || 0;
+                document.getElementById('winRate').textContent = formatPercent(data.win_rate || 0);
+                document.getElementById('totalProfit').textContent = formatCurrency(data.total_profit || 0);
+                
+                // Update indicators
+                if (data.indicators) {
+                    document.getElementById('rsi').textContent = (data.indicators.RSI_14 || 50).toFixed(1);
+                    document.getElementById('macd').textContent = (data.indicators.MACD || 0).toFixed(4);
                 }
+                
+                document.getElementById('modelAccuracy').textContent = formatPercent(data.model_accuracy || 0);
+                document.getElementById('dataSource').textContent = data.data_source || 'Unknown';
+                
+                // Update system status
+                document.getElementById('systemStatus').textContent = data.system_status || 'UNKNOWN';
+                document.getElementById('apiStatus').textContent = data.api_status || 'UNKNOWN';
+                document.getElementById('cycleCount').textContent = data.cycle_count || 0;
+                document.getElementById('serverTime').textContent = data.server_time ? 
+                    new Date(data.server_time).toLocaleTimeString() : '-';
+                document.getElementById('lastUpdate').textContent = 
+                    'Last update: ' + (data.last_update || '-');
+                
+                // Update active trade
+                updateActiveTrade(data.current_trade);
+                
+                // Update chart if available
+                if (data.chart_data) {
+                    try {
+                        const chartData = JSON.parse(data.chart_data);
+                        Plotly.react('priceChart', chartData.data, chartData.layout);
+                    } catch (e) {
+                        console.log('Chart update skipped:', e.message);
+                    }
+                }
+                
+            } catch (error) {
+                console.error('UI update error:', error);
             }
         }
         
         // Update active trade display
         function updateActiveTrade(trade) {
-            const activeTradeDiv = document.getElementById('activeTrade');
+            const container = document.getElementById('activeTrade');
             
             if (!trade) {
-                activeTradeDiv.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #aaa;">
-                        <div style="font-size: 2rem; margin-bottom: 10px;">📊</div>
-                        <div>No active trade</div>
-                        <div style="font-size: 0.9rem; margin-top: 10px;">Waiting for trading signal...</div>
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #88c7ff;">
+                        <div style="font-size: 3rem; margin-bottom: 15px;">📊</div>
+                        <div style="font-size: 1.2rem; margin-bottom: 10px;">No Active Trade</div>
+                        <div style="font-size: 0.9rem; opacity: 0.7;">Waiting for trading signal...</div>
                     </div>
                 `;
                 return;
             }
             
-            const profitColor = trade.profit_pct >= 0 ? '#00ff88' : '#ff4444';
-            const profitSign = trade.profit_pct >= 0 ? '+' : '';
+            const profit = trade.profit_pct || 0;
+            const profitClass = profit >= 0 ? 'trade-value' : 'trade-value negative';
+            const profitSign = profit >= 0 ? '+' : '';
             
-            activeTradeDiv.innerHTML = `
-                <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 10px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <div>
-                            <div style="color: #aaa; font-size: 0.9rem;">Trade #${trade.id}</div>
-                            <div style="font-size: 1.2rem; font-weight: bold; color: ${trade.action === 'BUY' ? '#00ff88' : '#ff4444'}">
-                                ${trade.action}
-                            </div>
+            container.innerHTML = `
+                <div class="trade-info">
+                    <div class="trade-header">
+                        <div style="color: ${trade.action === 'BUY' ? '#00e676' : '#ff4081'}; font-weight: bold; font-size: 1.3rem;">
+                            ${trade.action} #${trade.id}
                         </div>
-                        <div style="text-align: right;">
-                            <div style="color: #aaa; font-size: 0.9rem;">Entry Price</div>
-                            <div style="font-size: 1.2rem; font-weight: bold;">${formatNumber(trade.entry_price, 5)}</div>
+                        <div style="color: #00d4ff; font-size: 1.1rem;">
+                            ${formatPrice(trade.entry_price || 0)}
                         </div>
                     </div>
                     
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px;">
-                        <div>
-                            <div style="color: #aaa; font-size: 0.8rem;">Current Price</div>
-                            <div style="font-size: 1.1rem;">${formatNumber(trade.current_price || trade.entry_price, 5)}</div>
+                    <div class="trade-stats">
+                        <div class="trade-stat">
+                            <div class="trade-label">Current Price</div>
+                            <div class="trade-value">${formatPrice(trade.current_price || trade.entry_price || 0)}</div>
                         </div>
-                        <div>
-                            <div style="color: #aaa; font-size: 0.8rem;">P&L</div>
-                            <div style="font-size: 1.1rem; font-weight: bold; color: ${profitColor}">
-                                ${profitSign}${formatNumber(trade.profit_pct || 0, 3)}%
+                        <div class="trade-stat">
+                            <div class="trade-label">P&L</div>
+                            <div class="${profitClass}">${profitSign}${profit.toFixed(3)}%</div>
+                        </div>
+                        <div class="trade-stat">
+                            <div class="trade-label">Profit/Loss</div>
+                            <div class="${profitClass}">${profitSign}${formatCurrency(trade.profit_amount || 0)}</div>
+                        </div>
+                        <div class="trade-stat">
+                            <div class="trade-label">Status</div>
+                            <div class="trade-value" style="color: ${trade.status === 'OPEN' ? '#00e676' : '#ff9800'}">
+                                ${trade.status || 'OPEN'}
                             </div>
                         </div>
-                        <div>
-                            <div style="color: #aaa; font-size: 0.8rem;">Target</div>
-                            <div style="font-size: 1.1rem;">${formatNumber(trade.target_price, 5)}</div>
-                        </div>
-                        <div>
-                            <div style="color: #aaa; font-size: 0.8rem;">Stop Loss</div>
-                            <div style="font-size: 1.1rem;">${formatNumber(trade.stop_loss, 5)}</div>
-                        </div>
                     </div>
+                    
+                    ${trade.result ? `
+                    <div style="margin-top: 15px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px; text-align: center;">
+                        <div style="color: #88c7ff; font-size: 0.9rem;">Result: ${trade.result}</div>
+                        <div style="color: #aaa; font-size: 0.8rem;">${trade.exit_reason || ''}</div>
+                    </div>
+                    ` : ''}
                 </div>
             `;
-        }
-        
-        // Update status banner
-        function updateStatusBanner(state) {
-            const banner = document.getElementById('statusBanner');
-            
-            if (state.system_status === 'RUNNING') {
-                banner.className = 'status-banner success';
-                banner.innerHTML = `
-                    <p>✅ System connected and running | Data: ${state.data_source} | Next update in ${state.next_prediction_time}s</p>
-                `;
-                document.getElementById('dashboard').style.display = 'grid';
-            } else if (state.system_status === 'INITIALIZING') {
-                banner.className = 'status-banner';
-                banner.innerHTML = `
-                    <div class="spinner"></div>
-                    <p>🔄 System initializing... Please wait</p>
-                `;
-            } else if (state.system_status === 'ERROR') {
-                banner.className = 'status-banner error';
-                banner.innerHTML = `
-                    <p>⚠️ System error - Retrying connection...</p>
-                `;
-            }
         }
         
         // Fetch trading state from API
         async function fetchTradingState() {
             try {
                 const response = await fetch('/api/trading_state');
+                
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
                 }
+                
                 const data = await response.json();
                 
-                currentState = data;
-                updateUI(data);
-                
-                // Clear any existing interval and set new one
-                if (updateInterval) {
-                    clearInterval(updateInterval);
+                // Check for server errors
+                if (data.error) {
+                    throw new Error(data.message || 'Server error');
                 }
                 
-                // Update more frequently if system is still booting
-                const updateTime = data.system_status === 'RUNNING' ? 5000 : 2000;
-                updateInterval = setInterval(fetchTradingState, updateTime);
+                currentState = data;
+                connectionAttempts = 0;
+                
+                // Update UI based on system status
+                if (data.system_status === 'RUNNING') {
+                    updateStatusBanner('success', `System running | ${data.data_source} | Next update in ${data.next_prediction_time}s`);
+                    updateUI(data);
+                    
+                    // Set update interval based on prediction time
+                    const updateIntervalMs = Math.min(5000, (data.next_prediction_time || 60) * 1000);
+                    if (updateInterval) {
+                        clearInterval(updateInterval);
+                    }
+                    updateInterval = setInterval(fetchTradingState, updateIntervalMs);
+                    
+                } else if (data.system_status === 'BOOTING' || data.system_status === 'INITIALIZING') {
+                    updateStatusBanner('loading', 'System is starting up... Please wait');
+                    updateUI(data);
+                    
+                    // Check more frequently during startup
+                    if (updateInterval) {
+                        clearInterval(updateInterval);
+                    }
+                    updateInterval = setInterval(fetchTradingState, 2000);
+                    
+                } else {
+                    updateStatusBanner('error', `System status: ${data.system_status}`);
+                    updateUI(data);
+                }
                 
             } catch (error) {
-                console.error('Error fetching trading state:', error);
+                console.error('Fetch error:', error);
+                connectionAttempts++;
                 
-                const banner = document.getElementById('statusBanner');
-                banner.className = 'status-banner error';
-                banner.innerHTML = `
-                    <p>⚠️ Connection error - Retrying in 3 seconds...</p>
-                `;
-                
-                // Retry after 3 seconds
-                setTimeout(fetchTradingState, 3000);
+                if (connectionAttempts >= maxAttempts) {
+                    updateStatusBanner('error', 'Cannot connect to server. Please refresh the page.');
+                } else {
+                    updateStatusBanner('error', `Connection error - Retrying... (${connectionAttempts}/${maxAttempts})`);
+                    setTimeout(fetchTradingState, 3000);
+                }
             }
         }
         
@@ -624,7 +772,7 @@
             const buyBtn = document.getElementById('buyBtn');
             const sellBtn = document.getElementById('sellBtn');
             
-            // Disable buttons temporarily
+            // Disable buttons during request
             buyBtn.disabled = true;
             sellBtn.disabled = true;
             
@@ -634,15 +782,14 @@
                 
                 if (result.success) {
                     alert(`✅ ${action} trade executed successfully!`);
-                    // Refresh state
-                    fetchTradingState();
+                    fetchTradingState(); // Refresh data
                 } else {
                     alert(`❌ Trade failed: ${result.error}`);
                 }
             } catch (error) {
-                alert('❌ Network error - please try again');
+                alert('❌ Network error. Please try again.');
             } finally {
-                // Re-enable buttons after 2 seconds
+                // Re-enable buttons after delay
                 setTimeout(() => {
                     buyBtn.disabled = false;
                     sellBtn.disabled = false;
@@ -656,6 +803,10 @@
                 return;
             }
             
+            const resetBtn = document.getElementById('resetBtn');
+            resetBtn.disabled = true;
+            resetBtn.innerHTML = '🔄 Resetting...';
+            
             try {
                 const response = await fetch('/api/reset');
                 const result = await response.json();
@@ -667,7 +818,12 @@
                     alert(`❌ Reset failed: ${result.error}`);
                 }
             } catch (error) {
-                alert('❌ Network error - please try again');
+                alert('❌ Network error. Please try again.');
+            } finally {
+                setTimeout(() => {
+                    resetBtn.disabled = false;
+                    resetBtn.innerHTML = '🔄 Reset Trading';
+                }, 2000);
             }
         }
         
@@ -676,16 +832,26 @@
             // Start fetching data
             fetchTradingState();
             
-            // Initial status check
-            setTimeout(() => {
-                if (!currentState.system_status || currentState.system_status === 'BOOTING') {
-                    const banner = document.getElementById('statusBanner');
-                    banner.innerHTML = `
-                        <div class="spinner"></div>
-                        <p>🔄 System is starting up... This may take a moment</p>
-                    `;
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'b' || event.key === 'B') {
+                    executeTrade('BUY');
+                } else if (event.key === 's' || event.key === 'S') {
+                    executeTrade('SELL');
+                } else if (event.key === 'r' || event.key === 'R') {
+                    resetTrading();
                 }
-            }, 3000);
+            });
+            
+            // Add connection status indicator
+            window.addEventListener('online', () => {
+                updateStatusBanner('success', 'Connection restored');
+                fetchTradingState();
+            });
+            
+            window.addEventListener('offline', () => {
+                updateStatusBanner('error', 'You are offline');
+            });
         });
     </script>
 </body>
