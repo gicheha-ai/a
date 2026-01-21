@@ -23,7 +23,12 @@ warnings.filterwarnings('ignore')
 app = Flask(__name__)
 
 # Configuration
-API_KEYS = ['TZHOOJ7CNDMQ7HYD' , 'QSCWPKVUYLOD506J']
+API_KEYS = ['CS7OUGS2JFPTJPX6',  # Fresh Alpha Vantage key 1
+    'RUFG3ZRZ85A7G44F',  # Fresh Alpha Vantage key 2
+    'JDFW75DQB8B8E1QY',  # Fresh Alpha Vantage key 3
+    'TZYLB9XQYN5JJEGM',  # Fresh Alpha Vantage key 4
+    'ZJY4IUGHYO3WZMTF',  # Fresh Alpha Vantage key 5
+    'TZHOOJ7CNDMQ7HYD' , 'QSCWPKVUYLOD506J']
 current_key_index = 0
 BASE_URL = "https://www.alphavantage.co/query"
 
