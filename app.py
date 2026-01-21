@@ -97,12 +97,6 @@ def get_real_eurusd_price():
             'url': 'https://api.freeforexapi.com/v1/latest',
             'params': {'pairs': 'EURUSD'},
             'extract_rate': lambda data: data['rates']['EURUSD']
-        },
-        {
-            'name': 'CurrencyLayer',
-            'url': 'http://api.currencylayer.com/live',
-            'params': {'access_key': '6c9c3b3b5b5b5b5b5b5b5b5b5b5b5b5b', 'currencies': 'USD'},
-            'extract_rate': lambda data: 1 / data['quotes']['USDEUR'] if 'quotes' in data else None
         }
     ]
     
@@ -150,61 +144,65 @@ def create_price_series(current_price, num_points=30):
     
     return prices
 
-# ==================== ADVANCED TECHNICAL ANALYSIS ====================
-def calculate_advanced_indicators(prices):
-    """Calculate advanced technical indicators for prediction"""
+# ==================== SIMPLIFIED TECHNICAL ANALYSIS ====================
+def calculate_simplified_indicators(prices):
+    """Calculate simplified but effective technical indicators"""
     df = pd.DataFrame(prices, columns=['close'])
     
-    # Basic price features
-    df['returns'] = df['close'].pct_change()
-    df['volatility'] = df['returns'].rolling(5).std()
-    df['momentum'] = df['close'] - df['close'].shift(5)
-    
-    # Moving averages (multiple timeframes)
-    df['sma_5'] = ta.sma(df['close'], length=5)
-    df['sma_10'] = ta.sma(df['close'], length=10)
-    df['ema_8'] = ta.ema(df['close'], length=8)
-    df['ema_13'] = ta.ema(df['close'], length=13)
-    
-    # Momentum indicators
-    df['rsi'] = ta.rsi(df['close'], length=7)
-    df['stoch_k'] = ta.stoch(df['close'], df['close'], df['close'])['STOCHk_7_3_3']
-    df['cci'] = ta.cci(df['close'], df['close'], df['close'], length=10)
-    
-    # Trend indicators
-    macd = ta.macd(df['close'])
-    if macd is not None:
-        df['macd'] = macd['MACD_12_26_9']
-        df['macd_signal'] = macd['MACDs_12_26_9']
-        df['macd_hist'] = macd['MACDh_12_26_9']
-    
-    # Volatility indicators
-    bollinger = ta.bbands(df['close'])
-    if bollinger is not None:
-        df['bb_upper'] = bollinger['BBU_20_2.0']
-        df['bb_middle'] = bollinger['BBM_20_2.0']
-        df['bb_lower'] = bollinger['BBL_20_2.0']
-        df['bb_percent'] = (df['close'] - df['bb_lower']) / (df['bb_upper'] - df['bb_lower']) * 100
-    
-    # Pattern recognition
-    df['higher_high'] = (df['close'] > df['close'].shift(1)).astype(int)
-    df['lower_low'] = (df['close'] < df['close'].shift(1)).astype(int)
-    df['trend_strength'] = df['higher_high'].rolling(3).sum() - df['lower_low'].rolling(3).sum()
-    
-    # Support/Resistance levels
-    df['resistance'] = df['close'].rolling(10).max()
-    df['support'] = df['close'].rolling(10).min()
-    df['price_vs_resistance'] = (df['close'] / df['resistance'] - 1) * 100
-    df['price_vs_support'] = (df['close'] / df['support'] - 1) * 100
-    
-    # Market conditions
-    df['overbought'] = (df['rsi'] > 70).astype(int)
-    df['oversold'] = (df['rsi'] < 30).astype(int)
-    
-    # Fill NaN values
-    df = df.fillna(method='ffill').fillna(method='bfill')
-    
-    return df
+    try:
+        # Basic price features
+        df['returns'] = df['close'].pct_change()
+        df['momentum_5'] = df['close'] - df['close'].shift(5)
+        
+        # Moving averages
+        df['sma_5'] = ta.sma(df['close'], length=5)
+        df['sma_10'] = ta.sma(df['close'], length=10)
+        df['ema_8'] = ta.ema(df['close'], length=8)
+        
+        # RSI - most important momentum indicator
+        df['rsi'] = ta.rsi(df['close'], length=7)
+        
+        # MACD - trend indicator
+        macd = ta.macd(df['close'])
+        if macd is not None and isinstance(macd, pd.DataFrame):
+            df['macd'] = macd['MACD_12_26_9']
+            df['macd_signal'] = macd['MACDs_12_26_9']
+            df['macd_hist'] = macd['MACDh_12_26_9']
+        else:
+            df['macd'] = 0
+            df['macd_signal'] = 0
+            df['macd_hist'] = 0
+        
+        # Bollinger Bands - volatility indicator
+        bb = ta.bbands(df['close'], length=20)
+        if bb is not None and isinstance(bb, pd.DataFrame):
+            df['bb_upper'] = bb['BBU_20_2.0']
+            df['bb_lower'] = bb['BBL_20_2.0']
+            df['bb_percent'] = (df['close'] - df['bb_lower']) / (df['bb_upper'] - df['bb_lower']) * 100
+        else:
+            df['bb_percent'] = 50
+        
+        # Simple momentum indicators
+        df['price_change_1'] = df['close'].pct_change(1) * 100
+        df['price_change_3'] = df['close'].pct_change(3) * 100
+        
+        # Support/Resistance
+        df['resistance'] = df['close'].rolling(10).max()
+        df['support'] = df['close'].rolling(10).min()
+        
+        # Market conditions
+        df['overbought'] = (df['rsi'] > 70).astype(int)
+        df['oversold'] = (df['rsi'] < 30).astype(int)
+        
+        # Fill NaN values
+        df = df.fillna(method='ffill').fillna(method='bfill')
+        
+        return df
+        
+    except Exception as e:
+        logger.error(f"Indicator calculation error: {e}")
+        # Return basic dataframe if indicators fail
+        return df.fillna(0)
 
 # ==================== HIGH-ACCURACY PREDICTION ENGINE ====================
 def analyze_market_for_prediction(df, current_price):
@@ -221,63 +219,61 @@ def analyze_market_for_prediction(df, current_price):
         bear_score = 0
         confidence_factors = []
         
-        # 1. TREND ANALYSIS (40% weight)
+        # 1. RSI ANALYSIS (40% weight) - Most reliable indicator
+        if 'rsi' in df.columns:
+            rsi_value = latest['rsi']
+            if rsi_value < 40:  # Oversold territory
+                bull_score += 4
+                confidence_factors.append(1.5 if rsi_value < 30 else 1.2)
+            elif rsi_value > 60:  # Overbought territory
+                bear_score += 4
+                confidence_factors.append(1.5 if rsi_value > 70 else 1.2)
+        
+        # 2. TREND ANALYSIS (30% weight)
         if 'sma_5' in df.columns and 'sma_10' in df.columns:
             if latest['sma_5'] > latest['sma_10']:
-                bull_score += 4
+                bull_score += 3
                 confidence_factors.append(1.2)
             else:
-                bear_score += 4
+                bear_score += 3
                 confidence_factors.append(1.2)
         
-        # 2. MOMENTUM ANALYSIS (30% weight)
-        if 'rsi' in df.columns:
-            if latest['rsi'] < 40:  # Oversold
-                bull_score += 3
-                confidence_factors.append(1.5 if latest['rsi'] < 30 else 1.2)
-            elif latest['rsi'] > 60:  # Overbought
-                bear_score += 3
-                confidence_factors.append(1.5 if latest['rsi'] > 70 else 1.2)
-        
-        # 3. MACD SIGNAL (20% weight)
+        # 3. MACD ANALYSIS (20% weight)
         if 'macd_hist' in df.columns:
-            if latest['macd_hist'] > 0:
+            macd_hist = latest['macd_hist']
+            if macd_hist > 0:
                 bull_score += 2
-                confidence_factors.append(abs(latest['macd_hist']) * 100)
+                confidence_factors.append(min(2.0, 1 + abs(macd_hist) * 100))
             else:
                 bear_score += 2
-                confidence_factors.append(abs(latest['macd_hist']) * 100)
+                confidence_factors.append(min(2.0, 1 + abs(macd_hist) * 100))
         
         # 4. BOLLINGER BANDS (10% weight)
         if 'bb_percent' in df.columns:
-            if latest['bb_percent'] < 20:  # Near lower band
+            bb_percent = latest['bb_percent']
+            if bb_percent < 20:  # Near lower band - oversold
                 bull_score += 1
                 confidence_factors.append(1.3)
-            elif latest['bb_percent'] > 80:  # Near upper band
+            elif bb_percent > 80:  # Near upper band - overbought
                 bear_score += 1
                 confidence_factors.append(1.3)
         
-        # 5. RECENT PRICE ACTION
-        recent_trend = 1 if df['close'].iloc[-1] > df['close'].iloc[-5] else -1
-        if recent_trend > 0:
-            bull_score += 1
-        else:
-            bear_score += 1
+        # 5. RECENT MOMENTUM
+        if 'momentum_5' in df.columns:
+            momentum = latest['momentum_5']
+            if momentum > 0:
+                bull_score += 1
+            else:
+                bear_score += 1
         
-        # 6. VOLATILITY ADJUSTMENT
-        if 'volatility' in df.columns and latest['volatility'] > 0:
-            # Higher volatility increases confidence in strong signals
-            vol_factor = min(2.0, 1 + (latest['volatility'] * 1000))
-            confidence_factors.append(vol_factor)
-        
-        # Calculate total score and confidence
+        # Calculate total score and probability
         total_score = bull_score + bear_score
         if total_score == 0:
             return 0.5, 50, 'NEUTRAL', 0
         
         probability = bull_score / total_score
         
-        # Calculate confidence based on multiple factors
+        # Calculate confidence
         if confidence_factors:
             base_confidence = np.mean(confidence_factors) * 20
         else:
@@ -287,24 +283,31 @@ def analyze_market_for_prediction(df, current_price):
         signal_clarity = abs(probability - 0.5) * 2  # 0 to 1
         confidence = min(95, base_confidence * (1 + signal_clarity))
         
-        # Determine direction
-        if probability > 0.6:
+        # Determine direction and signal strength
+        if probability > 0.65:  # Strong bullish
             direction = 'BULLISH'
-            signal_strength = min(3, int((probability - 0.6) / 0.133))
-        elif probability < 0.4:
+            signal_strength = 3
+        elif probability > 0.55:  # Moderate bullish
+            direction = 'BULLISH'
+            signal_strength = 2
+        elif probability < 0.35:  # Strong bearish
             direction = 'BEARISH'
-            signal_strength = min(3, int((0.4 - probability) / 0.133))
+            signal_strength = 3
+        elif probability < 0.45:  # Moderate bearish
+            direction = 'BEARISH'
+            signal_strength = 2
         else:
             direction = 'NEUTRAL'
-            signal_strength = 0
-            confidence = max(30, confidence * 0.7)  # Reduce confidence for neutral signals
+            signal_strength = 1
+            confidence = max(30, confidence * 0.7)
         
-        # Add recent price trend boost
-        price_momentum = (df['close'].iloc[-1] / df['close'].iloc[-3] - 1) * 100
-        if abs(price_momentum) > 0.05:  # Significant momentum
-            if (direction == 'BULLISH' and price_momentum > 0) or (direction == 'BEARISH' and price_momentum < 0):
-                confidence = min(95, confidence + 10)
-                signal_strength = min(3, signal_strength + 1)
+        # Add price momentum boost
+        if 'price_change_3' in df.columns:
+            price_change = latest['price_change_3']
+            if abs(price_change) > 0.1:  # Significant momentum
+                if (direction == 'BULLISH' and price_change > 0) or (direction == 'BEARISH' and price_change < 0):
+                    confidence = min(95, confidence + 10)
+                    signal_strength = min(3, signal_strength + 1)
         
         return probability, confidence, direction, signal_strength
         
@@ -323,25 +326,23 @@ def generate_trading_signal(prediction_prob, confidence, direction, signal_stren
     if confidence < MIN_CONFIDENCE or signal_strength < MIN_SIGNAL_STRENGTH:
         return 'WAIT', confidence, "Low confidence - Waiting for stronger signal"
     
-    if direction == 'BULLISH':
+    if direction == 'BULLISH' and signal_strength >= 2:
         action = 'BUY'
-        reason = f"Strong bullish signal detected ({confidence:.1f}% confidence)"
-        if signal_strength >= 3:
-            reason += " - VERY STRONG BUY SIGNAL"
-        elif signal_strength == 2:
-            reason += " - Strong buy signal"
+        if signal_strength == 3:
+            reason = f"VERY STRONG BUY SIGNAL - Price expected to rise within 2 minutes ({confidence:.1f}% confidence)"
+        else:
+            reason = f"STRONG BUY SIGNAL - Price expected to rise within 2 minutes ({confidence:.1f}% confidence)"
         
-    elif direction == 'BEARISH':
+    elif direction == 'BEARISH' and signal_strength >= 2:
         action = 'SELL'
-        reason = f"Strong bearish signal detected ({confidence:.1f}% confidence)"
-        if signal_strength >= 3:
-            reason += " - VERY STRONG SELL SIGNAL"
-        elif signal_strength == 2:
-            reason += " - Strong sell signal"
+        if signal_strength == 3:
+            reason = f"VERY STRONG SELL SIGNAL - Price expected to fall within 2 minutes ({confidence:.1f}% confidence)"
+        else:
+            reason = f"STRONG SELL SIGNAL - Price expected to fall within 2 minutes ({confidence:.1f}% confidence)"
     
     else:
         action = 'WAIT'
-        reason = "Market is neutral - No clear direction"
+        reason = "Market is neutral - No clear direction for 2-minute prediction"
     
     return action, confidence, reason
 
@@ -460,7 +461,10 @@ def create_trading_chart(prices, is_demo, next_update):
     """Create trading chart with indicators"""
     try:
         df = pd.DataFrame(prices, columns=['close'])
-        df = calculate_advanced_indicators(prices)
+        
+        # Add basic indicators for chart
+        df['sma_5'] = ta.sma(df['close'], length=5)
+        df['sma_10'] = ta.sma(df['close'], length=10)
         
         fig = go.Figure()
         
@@ -475,49 +479,23 @@ def create_trading_chart(prices, is_demo, next_update):
         ))
         
         # Add moving averages
-        if 'sma_5' in df.columns:
-            fig.add_trace(go.Scatter(
-                x=list(range(len(prices))),
-                y=df['sma_5'],
-                mode='lines',
-                name='SMA 5',
-                line=dict(color='orange', width=1.5, dash='dash'),
-                opacity=0.7
-            ))
+        fig.add_trace(go.Scatter(
+            x=list(range(len(prices))),
+            y=df['sma_5'],
+            mode='lines',
+            name='SMA 5',
+            line=dict(color='orange', width=1.5, dash='dash'),
+            opacity=0.7
+        ))
         
-        if 'sma_10' in df.columns:
-            fig.add_trace(go.Scatter(
-                x=list(range(len(prices))),
-                y=df['sma_10'],
-                mode='lines',
-                name='SMA 10',
-                line=dict(color='cyan', width=1.5, dash='dot'),
-                opacity=0.7
-            ))
-        
-        # Add Bollinger Bands
-        if 'bb_upper' in df.columns and 'bb_lower' in df.columns:
-            fig.add_trace(go.Scatter(
-                x=list(range(len(prices))),
-                y=df['bb_upper'],
-                mode='lines',
-                name='BB Upper',
-                line=dict(color='rgba(255,255,255,0.3)', width=1),
-                opacity=0.5,
-                showlegend=False
-            ))
-            
-            fig.add_trace(go.Scatter(
-                x=list(range(len(prices))),
-                y=df['bb_lower'],
-                mode='lines',
-                name='BB Lower',
-                fill='tonexty',
-                fillcolor='rgba(255,255,255,0.1)',
-                line=dict(color='rgba(255,255,255,0.3)', width=1),
-                opacity=0.5,
-                showlegend=False
-            ))
+        fig.add_trace(go.Scatter(
+            x=list(range(len(prices))),
+            y=df['sma_10'],
+            mode='lines',
+            name='SMA 10',
+            line=dict(color='cyan', width=1.5, dash='dot'),
+            opacity=0.7
+        ))
         
         # Update layout
         title = f'EUR/USD Trading Chart - Next Signal in {next_update}s'
@@ -542,12 +520,10 @@ def create_trading_chart(prices, is_demo, next_update):
                 gridcolor='rgba(255,255,255,0.1)'
             ),
             template='plotly_dark',
-            height=500,
+            height=400,
             showlegend=True,
             hovermode='x unified',
-            margin=dict(l=50, r=50, t=80, b=50),
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)'
+            margin=dict(l=50, r=50, t=80, b=50)
         )
         
         return json.dumps(fig.to_dict(), cls=plotly.utils.PlotlyJSONEncoder)
@@ -586,7 +562,7 @@ def trading_cycle():
             price_series = create_price_series(current_price, 30)
             
             # ===== 3. CALCULATE TECHNICAL INDICATORS =====
-            df_with_indicators = calculate_advanced_indicators(price_series)
+            df_with_indicators = calculate_simplified_indicators(price_series)
             
             # ===== 4. MAKE 2-MINUTE PREDICTION =====
             logger.info("Analyzing market for 2-minute prediction...")
@@ -612,7 +588,7 @@ def trading_cycle():
             next_prediction_time = max(5, 120 - cycle_duration)  # Exactly 2 minutes
             
             # ===== 9. CREATE CHART =====
-            chart_data = create_trading_chart(price_series, data_source == 'Simulation', next_prediction_time)
+            chart_data = create_trading_chart(price_series, data_source == 'Simulation (APIs unavailable)', next_prediction_time)
             
             # ===== 10. UPDATE TRADING STATE =====
             trading_state.update({
@@ -621,9 +597,9 @@ def trading_cycle():
                 'action': action,
                 'confidence': round(float(action_confidence), 1),
                 'next_prediction_time': next_prediction_time,
-                'is_demo_data': data_source == 'Simulation',
+                'is_demo_data': data_source == 'Simulation (APIs unavailable)',
                 'last_update': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                'api_status': 'CONNECTED' if data_source != 'Simulation' else 'DEMO',
+                'api_status': 'CONNECTED' if 'Simulation' not in data_source else 'DEMO',
                 'data_source': data_source,
                 'chart_data': chart_data,
                 'cycle_count': cycle_count,
@@ -635,7 +611,7 @@ def trading_cycle():
             # Extract key indicators for display
             if not df_with_indicators.empty:
                 latest_indicators = {}
-                for col in ['rsi', 'macd', 'macd_hist', 'volatility', 'sma_5', 'sma_10']:
+                for col in ['rsi', 'macd', 'macd_hist', 'sma_5', 'sma_10']:
                     if col in df_with_indicators.columns:
                         latest_indicators[col] = float(df_with_indicators[col].iloc[-1])
                 trading_state['indicators'] = latest_indicators

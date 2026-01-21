@@ -135,7 +135,7 @@
                 
                 // Update status
                 const status = document.getElementById('status');
-                if (data.api_status === 'CONNECTED') {
+                if (data.api_status === 'CONNECTED' || data.api_status === 'DEMO') {
                     status.className = 'status connected';
                     status.innerHTML = `<p>✅ Connected to ${data.data_source} | Next signal in ${data.next_prediction_time}s</p>`;
                     document.getElementById('dashboard').style.display = 'grid';
